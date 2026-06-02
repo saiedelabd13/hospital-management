@@ -1,0 +1,1224 @@
+{
+  "info": {
+    "name": "🏥 Hospital Management System",
+    "description": "نظام إدارة المستشفى الشامل - Postman Collection\n\n**تعليمات الاستخدام:**\n1. شغّل المشروع: `mvn spring-boot:run`\n2. استورد الملف ده في Postman\n3. ابدأ بـ Login عشان تاخد الـ Token\n4. الـ Token بيتحط تلقائياً في كل الـ Requests\n\n**Base URL:** http://localhost:8080/api",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "patientId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "doctorId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "departmentId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "appointmentId",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "recordId",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Authentication",
+      "item": [
+        {
+          "name": "Login - Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const res = pm.response.json();",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    pm.test('✅ Login successful', () => pm.response.to.have.status(200));",
+                  "    pm.test('✅ Token received', () => pm.expect(res.token).to.not.be.empty);",
+                  "    console.log('Token saved:', res.token);",
+                  "} else {",
+                  "    pm.test('❌ Login failed', () => pm.response.to.have.status(200));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "description": "تسجيل الدخول كمدير النظام - يحفظ الـ Token تلقائياً"
+          }
+        },
+        {
+          "name": "Login - Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const res = pm.response.json();",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    pm.test('✅ Doctor Login successful', () => pm.response.to.have.status(200));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"dr.ahmed\",\n  \"password\": \"doctor123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Receptionist",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const res = pm.response.json();",
+                  "    pm.collectionVariables.set('token', res.token);",
+                  "    pm.test('✅ Receptionist Login successful', () => pm.response.to.have.status(200));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"receptionist\",\n  \"password\": \"reception123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login - Wrong Password ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Should return 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"usernameOrEmail\": \"admin\",\n  \"password\": \"wrongpassword\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Register New User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ User registered', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has message', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.message).to.include('نجاح');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@hospital.com\",\n  \"password\": \"password123\",\n  \"roles\": [\"ROLE_PATIENT\"]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏢 Departments",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "    pm.expect(res.length).to.be.greaterThan(0);",
+                  "    if (res.length > 0) pm.collectionVariables.set('departmentId', res[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/departments", "host": ["{{baseUrl}}"], "path": ["departments"] }
+          }
+        },
+        {
+          "name": "Get Active Departments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ All departments are ACTIVE', () => {",
+                  "    const res = pm.response.json();",
+                  "    res.forEach(d => pm.expect(d.status).to.equal('ACTIVE'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/departments/active", "host": ["{{baseUrl}}"], "path": ["departments", "active"] }
+          }
+        },
+        {
+          "name": "Get Department By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has department name', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.name).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/departments/{{departmentId}}", "host": ["{{baseUrl}}"], "path": ["departments", "{{departmentId}}"] }
+          }
+        },
+        {
+          "name": "Create Department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('✅ Department created with correct name', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.name).to.equal('قسم الأمراض الجلدية');",
+                  "    pm.collectionVariables.set('departmentId', res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"قسم الأمراض الجلدية\",\n  \"description\": \"تشخيص وعلاج أمراض الجلد والشعر والأظافر\",\n  \"location\": \"الطابق الخامس - جناح E\",\n  \"phoneNumber\": \"02-1234-005\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/departments", "host": ["{{baseUrl}}"], "path": ["departments"] }
+          }
+        },
+        {
+          "name": "Update Department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Department updated', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.description).to.include('محدّث');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"قسم الأمراض الجلدية\",\n  \"description\": \"وصف محدّث - تشخيص وعلاج أمراض الجلد\",\n  \"location\": \"الطابق الخامس - جناح E\",\n  \"phoneNumber\": \"02-1234-099\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/departments/{{departmentId}}", "host": ["{{baseUrl}}"], "path": ["departments", "{{departmentId}}"] }
+          }
+        },
+        {
+          "name": "Delete Department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 204 No Content', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/departments/{{departmentId}}", "host": ["{{baseUrl}}"], "path": ["departments", "{{departmentId}}"] }
+          }
+        },
+        {
+          "name": "Get Department Not Found ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Should return 404', () => pm.response.to.have.status(404));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/departments/9999", "host": ["{{baseUrl}}"], "path": ["departments", "9999"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👨‍⚕️ Doctors",
+      "item": [
+        {
+          "name": "Get All Doctors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "    if (res.length > 0) pm.collectionVariables.set('doctorId', res[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/doctors", "host": ["{{baseUrl}}"], "path": ["doctors"] }
+          }
+        },
+        {
+          "name": "Get Active Doctors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ All doctors are ACTIVE', () => {",
+                  "    const res = pm.response.json();",
+                  "    res.forEach(d => pm.expect(d.status).to.equal('ACTIVE'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/doctors/active", "host": ["{{baseUrl}}"], "path": ["doctors", "active"] }
+          }
+        },
+        {
+          "name": "Get Doctor By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has full name', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.fullName).to.include('Dr.');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/doctors/{{doctorId}}", "host": ["{{baseUrl}}"], "path": ["doctors", "{{doctorId}}"] }
+          }
+        },
+        {
+          "name": "Search Doctors",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/doctors/search?keyword=أحمد",
+              "host": ["{{baseUrl}}"],
+              "path": ["doctors", "search"],
+              "query": [{ "key": "keyword", "value": "أحمد" }]
+            }
+          }
+        },
+        {
+          "name": "Get Doctors By Department",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/doctors/department/1", "host": ["{{baseUrl}}"], "path": ["doctors", "department", "1"] }
+          }
+        },
+        {
+          "name": "Get Doctors By Specialization",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/doctors/specialization/أمراض القلب", "host": ["{{baseUrl}}"], "path": ["doctors", "specialization", "أمراض القلب"] }
+          }
+        },
+        {
+          "name": "Create Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('✅ Doctor created', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.email).to.equal('dr.new@hospital.com');",
+                  "    pm.collectionVariables.set('doctorId', res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"خالد\",\n  \"lastName\": \"عبدالله\",\n  \"email\": \"dr.new@hospital.com\",\n  \"licenseNumber\": \"LIC-999\",\n  \"phoneNumber\": \"010-1234-9999\",\n  \"specialization\": \"طب الباطنة\",\n  \"yearsOfExperience\": 12,\n  \"qualification\": \"دكتوراه في الطب الباطني\",\n  \"status\": \"ACTIVE\",\n  \"departmentId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/doctors", "host": ["{{baseUrl}}"], "path": ["doctors"] }
+          }
+        },
+        {
+          "name": "Update Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"خالد\",\n  \"lastName\": \"عبدالله\",\n  \"email\": \"dr.new@hospital.com\",\n  \"licenseNumber\": \"LIC-999\",\n  \"phoneNumber\": \"010-9999-8888\",\n  \"specialization\": \"طب الباطنة والسكر\",\n  \"yearsOfExperience\": 13,\n  \"qualification\": \"دكتوراه في الطب الباطني - محدّث\",\n  \"status\": \"ACTIVE\",\n  \"departmentId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/doctors/{{doctorId}}", "host": ["{{baseUrl}}"], "path": ["doctors", "{{doctorId}}"] }
+          }
+        },
+        {
+          "name": "Delete Doctor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/doctors/{{doctorId}}", "host": ["{{baseUrl}}"], "path": ["doctors", "{{doctorId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🧑‍🤝‍🧑 Patients",
+      "item": [
+        {
+          "name": "Get All Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "    if (res.length > 0) pm.collectionVariables.set('patientId', res[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+          }
+        },
+        {
+          "name": "Get Active Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients/active", "host": ["{{baseUrl}}"], "path": ["patients", "active"] }
+          }
+        },
+        {
+          "name": "Get Patient By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has full name', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.fullName).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients/{{patientId}}", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}"] }
+          }
+        },
+        {
+          "name": "Search Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/patients/search?keyword=عمر",
+              "host": ["{{baseUrl}}"],
+              "path": ["patients", "search"],
+              "query": [{ "key": "keyword", "value": "عمر" }]
+            }
+          }
+        },
+        {
+          "name": "Count Active Patients",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns a number', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients/count/active", "host": ["{{baseUrl}}"], "path": ["patients", "count", "active"] }
+          }
+        },
+        {
+          "name": "Create Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('✅ Patient created', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.firstName).to.equal('محمود');",
+                  "    pm.collectionVariables.set('patientId', res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"محمود\",\n  \"lastName\": \"سعيد\",\n  \"email\": \"mahmoud.said@email.com\",\n  \"dateOfBirth\": \"1995-06-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"010-1111-3333\",\n  \"address\": \"القاهرة، التجمع الخامس\",\n  \"nationalId\": \"29506151234567\",\n  \"bloodType\": \"AB+\",\n  \"emergencyContactName\": \"سعيد محمود\",\n  \"emergencyContactPhone\": \"010-2222-4444\",\n  \"allergies\": \"لا يوجد\",\n  \"chronicDiseases\": \"لا يوجد\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+          }
+        },
+        {
+          "name": "Update Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"محمود\",\n  \"lastName\": \"سعيد\",\n  \"email\": \"mahmoud.said@email.com\",\n  \"dateOfBirth\": \"1995-06-15\",\n  \"gender\": \"MALE\",\n  \"phoneNumber\": \"010-9999-3333\",\n  \"address\": \"القاهرة، مدينة نصر - محدّث\",\n  \"nationalId\": \"29506151234567\",\n  \"bloodType\": \"AB+\",\n  \"emergencyContactName\": \"سعيد محمود\",\n  \"emergencyContactPhone\": \"010-2222-4444\",\n  \"allergies\": \"بنسلين\",\n  \"chronicDiseases\": \"لا يوجد\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/patients/{{patientId}}", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}"] }
+          }
+        },
+        {
+          "name": "Delete Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/patients/{{patientId}}", "host": ["{{baseUrl}}"], "path": ["patients", "{{patientId}}"] }
+          }
+        },
+        {
+          "name": "Create Patient - Validation Error ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Should return 400 Bad Request', () => pm.response.to.have.status(400));",
+                  "pm.test('✅ Has validation errors', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.errors).to.not.be.null;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"\",\n  \"email\": \"invalid-email\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📅 Appointments",
+      "item": [
+        {
+          "name": "Get All Appointments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "    if (res.length > 0) pm.collectionVariables.set('appointmentId', res[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments", "host": ["{{baseUrl}}"], "path": ["appointments"] }
+          }
+        },
+        {
+          "name": "Get Today Appointments",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments/today", "host": ["{{baseUrl}}"], "path": ["appointments", "today"] }
+          }
+        },
+        {
+          "name": "Get Appointment By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has patient and doctor', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.patientName).to.not.be.empty;",
+                  "    pm.expect(res.doctorName).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments/{{appointmentId}}", "host": ["{{baseUrl}}"], "path": ["appointments", "{{appointmentId}}"] }
+          }
+        },
+        {
+          "name": "Get Appointments By Patient",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments/patient/1", "host": ["{{baseUrl}}"], "path": ["appointments", "patient", "1"] }
+          }
+        },
+        {
+          "name": "Get Appointments By Doctor",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments/doctor/1", "host": ["{{baseUrl}}"], "path": ["appointments", "doctor", "1"] }
+          }
+        },
+        {
+          "name": "Get Appointments By Status - SCHEDULED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ All appointments are SCHEDULED', () => {",
+                  "    const res = pm.response.json();",
+                  "    res.forEach(a => pm.expect(a.status).to.equal('SCHEDULED'));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/appointments/status/SCHEDULED", "host": ["{{baseUrl}}"], "path": ["appointments", "status", "SCHEDULED"] }
+          }
+        },
+        {
+          "name": "Get Appointments By Date Range",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/appointments/range?start=2025-01-01T00:00:00&end=2027-12-31T23:59:59",
+              "host": ["{{baseUrl}}"],
+              "path": ["appointments", "range"],
+              "query": [
+                { "key": "start", "value": "2025-01-01T00:00:00" },
+                { "key": "end", "value": "2027-12-31T23:59:59" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('✅ Appointment created', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.status).to.equal('SCHEDULED');",
+                  "    pm.collectionVariables.set('appointmentId', res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"appointmentDateTime\": \"2026-12-20T10:00:00\",\n  \"reason\": \"فحص دوري شامل للقلب\",\n  \"type\": \"REGULAR\",\n  \"durationMinutes\": 30,\n  \"notes\": \"المريض يشكو من ضيق في التنفس أحياناً\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/appointments", "host": ["{{baseUrl}}"], "path": ["appointments"] }
+          }
+        },
+        {
+          "name": "Update Appointment Status - CONFIRMED",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Status updated to CONFIRMED', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.status).to.equal('CONFIRMED');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"notes\": \"تم التأكيد من قِبل الاستقبال\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/appointments/{{appointmentId}}/status", "host": ["{{baseUrl}}"], "path": ["appointments", "{{appointmentId}}", "status"] }
+          }
+        },
+        {
+          "name": "Update Appointment Status - COMPLETED",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"COMPLETED\",\n  \"notes\": \"تم إنهاء الكشف بنجاح\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/appointments/{{appointmentId}}/status", "host": ["{{baseUrl}}"], "path": ["appointments", "{{appointmentId}}", "status"] }
+          }
+        },
+        {
+          "name": "Cancel Appointment",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/appointments/{{appointmentId}}/cancel", "host": ["{{baseUrl}}"], "path": ["appointments", "{{appointmentId}}", "cancel"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Medical Records",
+      "item": [
+        {
+          "name": "Get All Medical Records",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Returns array', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res).to.be.an('array');",
+                  "    if (res.length > 0) pm.collectionVariables.set('recordId', res[0].id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/medical-records", "host": ["{{baseUrl}}"], "path": ["medical-records"] }
+          }
+        },
+        {
+          "name": "Get Record By ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has diagnosis', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.diagnosis).to.not.be.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/medical-records/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["medical-records", "{{recordId}}"] }
+          }
+        },
+        {
+          "name": "Get Records By Patient",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/medical-records/patient/1", "host": ["{{baseUrl}}"], "path": ["medical-records", "patient", "1"] }
+          }
+        },
+        {
+          "name": "Get Records By Doctor",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/medical-records/doctor/1", "host": ["{{baseUrl}}"], "path": ["medical-records", "doctor", "1"] }
+          }
+        },
+        {
+          "name": "Create Medical Record + Prescriptions",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 201 Created', () => pm.response.to.have.status(201));",
+                  "pm.test('✅ Record created with prescriptions', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.diagnosis).to.not.be.empty;",
+                  "    pm.expect(res.prescriptions).to.be.an('array');",
+                  "    pm.expect(res.prescriptions.length).to.be.greaterThan(0);",
+                  "    pm.collectionVariables.set('recordId', res.id);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"diagnosis\": \"ارتفاع ضغط الدم المزمن\",\n  \"symptoms\": \"صداع متكرر، دوار، ضيق في التنفس عند المجهود\",\n  \"treatmentPlan\": \"أدوية خافضة للضغط مع تعديل نمط الحياة والغذاء\",\n  \"doctorNotes\": \"المريض يحتاج متابعة شهرية وقياس الضغط يومياً\",\n  \"weight\": 85.5,\n  \"height\": 175.0,\n  \"bloodPressure\": \"150/95\",\n  \"heartRate\": 88,\n  \"temperature\": 37.2,\n  \"prescriptions\": [\n    {\n      \"medicationName\": \"أملوديبين\",\n      \"dosage\": \"5mg\",\n      \"frequency\": \"مرة واحدة يومياً\",\n      \"durationDays\": 30,\n      \"startDate\": \"2026-05-15\",\n      \"instructions\": \"يؤخذ في الصباح مع الطعام\",\n      \"refillAllowed\": true\n    },\n    {\n      \"medicationName\": \"أسبرين\",\n      \"dosage\": \"100mg\",\n      \"frequency\": \"مرة واحدة يومياً\",\n      \"durationDays\": 30,\n      \"startDate\": \"2026-05-15\",\n      \"instructions\": \"يؤخذ مع الطعام لتجنب تهيج المعدة\",\n      \"refillAllowed\": false\n    }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/medical-records", "host": ["{{baseUrl}}"], "path": ["medical-records"] }
+          }
+        },
+        {
+          "name": "Update Medical Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"patientId\": 1,\n  \"doctorId\": 1,\n  \"diagnosis\": \"ارتفاع ضغط الدم المزمن - محدّث\",\n  \"symptoms\": \"تحسن ملحوظ في الأعراض\",\n  \"treatmentPlan\": \"الاستمرار في الدواء مع ممارسة الرياضة\",\n  \"doctorNotes\": \"الحالة تتحسن، متابعة كل شهرين\",\n  \"weight\": 84.0,\n  \"height\": 175.0,\n  \"bloodPressure\": \"135/85\",\n  \"heartRate\": 80,\n  \"temperature\": 37.0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/medical-records/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["medical-records", "{{recordId}}"] }
+          }
+        },
+        {
+          "name": "Delete Medical Record",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 204', () => pm.response.to.have.status(204));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/medical-records/{{recordId}}", "host": ["{{baseUrl}}"], "path": ["medical-records", "{{recordId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Dashboard",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Has all required stats', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.totalPatients).to.be.a('number');",
+                  "    pm.expect(res.totalDoctors).to.be.a('number');",
+                  "    pm.expect(res.totalDepartments).to.be.a('number');",
+                  "    pm.expect(res.todayAppointments).to.be.a('number');",
+                  "    pm.expect(res.appointmentsByStatus).to.be.an('object');",
+                  "    console.log('📊 Stats:', JSON.stringify(res, null, 2));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["dashboard", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔒 Security Tests",
+      "item": [
+        {
+          "name": "Access Without Token ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Should return 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+          }
+        },
+        {
+          "name": "Access With Invalid Token ❌",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Should return 401', () => pm.response.to.have.status(401));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "invalid.token.here", "type": "string" }]
+            },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/patients", "host": ["{{baseUrl}}"], "path": ["patients"] }
+          }
+        },
+        {
+          "name": "Health Check (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('✅ Service is UP', () => pm.response.to.have.status(200));",
+                  "pm.test('✅ Status is UP', () => {",
+                  "    const res = pm.response.json();",
+                  "    pm.expect(res.status).to.equal('UP');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+          }
+        }
+      ]
+    }
+  ]
+}
