@@ -34,7 +34,7 @@ app:
   jwt:
     secret: HospitalManagementSystemSecretKeyForJWTTokenGeneration2024VeryLongAndSecure
     expiration: 86400000
-    refresh-expiration: 604800000
+    refresh-expiration: 60480000000000
 
 server:
   port: 8080
